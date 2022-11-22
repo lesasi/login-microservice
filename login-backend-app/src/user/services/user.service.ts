@@ -19,7 +19,15 @@ export class UserService {
     await this.userRepository.addOrUpdateEntity(user);
   }
 
-  async getUserByEmail(email: string) {
-    return this.userRepository.findEntities({ email });
+  async getUserByEmail(email: string): Promise<IUser> {
+    return this.userRepository.findOne({ email });
+  }
+
+  async saveTokenToUser(user: IUser, token: string) {
+    const newUser: IUser = {
+      ...user,
+      tokens: [...user.tokens, token]
+    };
+    await this.userRepository.addOrUpdateEntity(newUser);
   }
 }
