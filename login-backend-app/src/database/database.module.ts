@@ -1,8 +1,24 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { MongoClient } from 'mongodb';
+import { MONGO_CONNECTION } from './utils';
 
+const connection = {
+  provide: MONGO_CONNECTION,
+  useFactory: async (configService: ConfigService) => {
+    try {
+      const mongoConnectionUrl = configService.get('mongoConnectionString');
+      return await MongoClient.connect(mongoConnectionUrl, { maxPoolSize: 2 });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  inject: [ConfigService],
+};
+
+@Global()
 @Module({
-  imports: [],
-  controllers: [],
-  providers: [],
+  providers: [connection],
+  exports: [connection]
 })
 export class DatabaseModule {}
