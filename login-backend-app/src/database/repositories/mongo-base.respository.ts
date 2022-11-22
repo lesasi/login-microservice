@@ -1,4 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { ClassConstructor, plainToInstance } from "class-transformer";
+import { validate } from "class-validator";
 import { Filter, MongoClient, Sort } from "mongodb";
 import { IEntity } from "../interfaces/entity.interface";
 import { MONGO_CONNECTION } from "../utils";
@@ -15,16 +17,40 @@ export abstract class BaseRepository<T extends IEntity> {
     return this.connection.db().collection(this.collection_name);
   }
 
-  async addOrUpdateEntites(data: T[]): Promise<void> {
-    if (!data || data.length === 0) {
+  abstract getClass(): (data: T) => ClassConstructor<T>;
+
+  async validateEntity(entity: T) {
+    const errors = await validate(plainToInstance(this.getClass()(entity), entity));
+    // Do something to deal with the errors later
+    return errors;
+  }
+
+  async findEntities(
+    filter: Filter<T> = {},
+    customHint?: Record<string, number>,
+    customSort?: Sort,
+  ): Promise<T[]> {
+    const docsFind = this.getCollection().find<T>(filter, {
+      hint: customHint,
+      sort: customSort,
+    });
+    const entities = await docsFind.toArray();
+    return entities;
+  }
+
+  async addOrUpdateEntities(entities: T[], ignoreValidation = false): Promise<void> {
+    if (!entities || entities.length === 0) {
       return;
     }
-    const querys = data.map((entity) => {
+    if(!ignoreValidation) {
+      await Promise.all(entities.map(async (e) => await this.validateEntity(e)));
+    }
+    const querys = entities.map((entity) => {
       if(entity) {
         return {
           updateOne: {
             filter: { _id: entity._id },
-            update: { $set: { data: entity } },
+            update: { $set: entity },
             upsert: true,
           },
         };
@@ -33,20 +59,7 @@ export abstract class BaseRepository<T extends IEntity> {
     await this.getCollection().bulkWrite(querys);
   }
 
-  async findAll(
-    filter: Filter<T> = {},
-    hint?: Record<string, number>,
-    sort?: Sort,
-  ): Promise<T[]> {
-    const docsFind = this.getCollection().find(filter, {
-      hint,
-      sort,
-    });
-    const entities = await docsFind.toArray();
-    return entities.map((entity) => entity.data);
-  }
-
-  async findCount(filter: Filter<T> = {}, isDeleted: 'true' | 'false' | 'any' = 'false'): Promise<number> {
+  async findCount(filter: Filter<T> = {}): Promise<number> {
     const number = await this.getCollection().countDocuments(filter);
     return number;
   }
