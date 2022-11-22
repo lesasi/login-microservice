@@ -1,12 +1,13 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { ClassConstructor, plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { Filter, MongoClient, Sort } from "mongodb";
+import { IValidationMessage, transformErrorMessages } from "../../utils";
 import { IEntity } from "../interfaces/entity.interface";
 import { MONGO_CONNECTION } from "../utils";
 
 @Injectable()
-export abstract class BaseRepository<T extends IEntity> {
+export abstract class BaseRepository<T extends IEntity> implements OnModuleInit {
   protected abstract collection_name: string;
   
   constructor(
@@ -17,18 +18,40 @@ export abstract class BaseRepository<T extends IEntity> {
     return this.connection.db().collection(this.collection_name);
   }
 
+  async onModuleInit() {
+    const indexes = this.getTableIndexes();
+    await Promise.all(
+      indexes.map(async (index) => {
+        await this.getCollection().createIndex(index);
+      }),
+    );
+  }
+
+  // Return array of indexes to open on table
+  abstract getTableIndexes(): Record<string, number>[];
+
   abstract getClass(): (data: T) => ClassConstructor<T>;
 
   async validateEntity(entity: T) {
     const errors = await validate(plainToInstance(this.getClass()(entity), entity));
+    const transformedErrorMessages = transformErrorMessages(errors);
     // Do something to deal with the errors later
-    return errors;
+    return transformedErrorMessages;
+  }
+
+  async findOne(
+    filter: Filter<T> = {},
+    customHint?: Record<string, number>,
+    customSort?: Sort,
+  ) {
+    const entities = await this.findEntities(filter, customSort, customHint);
+    return entities && entities.length > 0 ? entities[0]: null;
   }
 
   async findEntities(
     filter: Filter<T> = {},
-    customHint?: Record<string, number>,
     customSort?: Sort,
+    customHint?: Record<string, number>,
   ): Promise<T[]> {
     const docsFind = this.getCollection().find<T>(filter, {
       hint: customHint,
@@ -38,12 +61,20 @@ export abstract class BaseRepository<T extends IEntity> {
     return entities;
   }
 
-  async addOrUpdateEntities(entities: T[], ignoreValidation = false): Promise<void> {
+  async addOrUpdateEntity(entity: T, ignoreValidation: boolean = false): Promise<void | IValidationMessage[]> {
+    await this.addOrUpdateEntities([entity], ignoreValidation);
+  }
+
+  async addOrUpdateEntities(entities: T[], ignoreValidation = false): Promise<void| IValidationMessage[]> {
     if (!entities || entities.length === 0) {
       return;
     }
     if(!ignoreValidation) {
-      await Promise.all(entities.map(async (e) => await this.validateEntity(e)));
+      const errors = (await Promise.all(entities.map(async (e) => await this.validateEntity(e))))?.flat();
+      if(errors && errors.length > 0) {
+        console.error('Error in saving ', entities, errors)
+        return errors;
+      }
     }
     const querys = entities.map((entity) => {
       if(entity) {
