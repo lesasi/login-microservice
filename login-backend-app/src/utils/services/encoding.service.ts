@@ -1,17 +1,12 @@
 import { Injectable } from "@nestjs/common";
 
 @Injectable()
-export class AuthService {
+export class EncodingService {
   constructor() {}
 
   // Comparison of passwords - in future, use Hashes
   async comparePassword(password: string, userPassword: string) {
     return password === userPassword;
-  }
-
-  async generateToken(_id: string) {
-    const cookie = `${_id}:${Date.now()}`;
-    return cookie;
   }
 
   // In the future, use JWT, or some other encoding/decoding
