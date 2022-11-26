@@ -1,7 +1,6 @@
-import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
-import { request } from "http";
-import { ILoginRedirectBody } from "../interfaces/auth.interface";
+import { ILoginEmailAndPassword, ILoginRedirectBody } from "../interfaces/auth.interface";
 import { LoginService } from "../services/login.service";
 
 @Controller('auth')
@@ -24,13 +23,23 @@ export class AuthController {
   }
 
   @Post('/login')
-  async login() {
+  async login(
+    @Body() body: ILoginEmailAndPassword,
+    @Param('state') state: string, 
+    @Res({ passthrough: true }) res: Response,
+  ) {
     // After entering email/password, login frontend will hit this
-    // We get the user by email, and then check if password matches
-    // If no, we reject
-    // If yes, we redirect to thr REDIRECT_URL supplied by the client in login-redirect
     // We should make sure the frontend app passes the state
-    // We set the generated cookie
+    const { success, error } = await this.loginService.loginWithEmailAndPassword(body, state);
+    if(success) {
+      const cookieName = 'AUTH_COOKIE_NAME';
+      res.cookie(cookieName, success.cookie);
+      res.redirect(success.redirectUrl);
+      return;
+    } 
+    else {
+      // Handle errors later
+    }
   }
 
   @Get('/create-user-redirect')

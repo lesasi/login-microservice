@@ -14,4 +14,9 @@ export class AuthService {
     const encodedObject = JSON.stringify(obj);
     return encodedObject;
   }
+
+  async decodeToObject(state: string) {
+    const decodedObject = JSON.parse(state);
+    return decodedObject;
+  }
 }
