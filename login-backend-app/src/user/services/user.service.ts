@@ -27,7 +27,6 @@ export class UserService {
   }
 
   async generateAndSaveTokenToUser(user: IUser) {
-    // Use JWT to encode it later?
     const token = await this.encodingService.encodeId(user._id);
     const updatedUser: IUser = {
       ...user,
@@ -47,5 +46,17 @@ export class UserService {
       tokens: token
     });
     return user;
+  }
+
+  async removeTokenFromUser(token: string) {
+    const user = await this.getUserFromToken(token);
+    const updatedUser: IUser = {
+      ...user,
+      tokens: user.tokens.filter(t => t !== token)
+    };
+    await this.userRepository.addOrUpdateEntity(updatedUser);
+    return {
+      user,
+    };
   }
 }

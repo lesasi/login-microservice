@@ -48,7 +48,6 @@ export class LoginService {
         }
       };
     }
-    // generate cookie - proabbly use JWT later
     const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
     const decodedState: IRedirectState = await this.encodingService.decodeToObject(state);
     return {
@@ -78,10 +77,20 @@ export class LoginService {
     };
   }
 
-  async getUserFromCookie(cookies: Record<string, string>) {
+  async getUserDetailsFromCookie(cookies: Record<string, string>) {
     const authCookieName = this.configService.get('authCookieName');
-    const token = await cookies[authCookieName];
-    const user = await this.userService.getUserFromToken(token);
+    const token = cookies[authCookieName];
+    const { _id, email } = await this.userService.getUserFromToken(token);
+    return {
+      _id,
+      email
+    };
+  }
+
+  async logoutUser(cookies: Record<string, string>) {
+    const authCookieName = this.configService.get('authCookieName');
+    const token = cookies[authCookieName];
+    const { user } = await this.userService.removeTokenFromUser(token);
     return user;
   }
 }

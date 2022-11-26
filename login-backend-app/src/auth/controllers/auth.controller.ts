@@ -74,7 +74,13 @@ export class AuthController {
   
   @Get('/get-user')
   async getUser(@Req() req: Request) {
-    const user = await this.loginService.getUserFromCookie(req.cookies);
-    return user;
+    const userDetails = await this.loginService.getUserDetailsFromCookie(req.cookies);
+    return userDetails;
+  }
+
+  @Get('/logout')
+  async logout(@Req() req: Request) {
+    const user = await this.loginService.logoutUser(req.cookies);
+    return user._id;
   }
 }
