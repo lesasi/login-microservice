@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
-import { ILoginEmailAndPassword, ILoginRedirectBody } from "../interfaces/auth.interface";
+import { ICreateUserRedirectBody, ILoginEmailAndPassword, ILoginRedirectBody } from "../interfaces/auth.interface";
 import { LoginService } from "../services/login.service";
 
 @Controller('auth')
@@ -43,9 +43,15 @@ export class AuthController {
   }
 
   @Get('/create-user-redirect')
-  async createUserRedirect() {
+  async createUserRedirect(
+    @Body() body: ICreateUserRedirectBody,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     // Client create endpoint comes here
     // We redirect to our create user frontend app
+    const redirectUrl = await this.loginService.createUserRedirect(body, req.cookies);
+    res.redirect(redirectUrl);
   }
 
   @Post('/create-user')

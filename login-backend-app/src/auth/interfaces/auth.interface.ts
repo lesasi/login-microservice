@@ -23,3 +23,7 @@ export interface ILoginEmailAndPasswordOutput {
     message: string;
   }
 }
+
+export interface ICreateUserRedirectBody {
+  redirectUrl: string;
+}
