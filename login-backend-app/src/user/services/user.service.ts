@@ -9,7 +9,7 @@ export class UserService {
     private readonly userRepository: UserRepository,
   ){}
 
-  async createUser(email: string, password: string) {
+  async createUserWithEmailAndPassword(email: string, password: string) {
     const user: IUser = {
       _id: uuid(),
       email,
@@ -17,6 +17,7 @@ export class UserService {
       tokens: []
     };
     await this.userRepository.addOrUpdateEntity(user);
+    return user;
   }
 
   async getUserByEmail(email: string): Promise<IUser> {

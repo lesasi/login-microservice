@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { UserService } from "../../user/services/user.service";
-import { ICreateUserRedirectBody, ILoginEmailAndPassword, ILoginEmailAndPasswordOutput, ILoginRedirectBody, ILoginRedirectState } from "../interfaces/auth.interface";
+import { ICreateUserEmailAndPassword, ICreateUserEmailAndPasswordOutput, ICreateUserRedirectBody, ILoginEmailAndPassword, ILoginEmailAndPasswordOutput, ILoginRedirectBody, IRedirectState } from "../interfaces/auth.interface";
 import { AuthService } from "./auth.service";
 
 @Injectable()
@@ -33,13 +33,32 @@ export class LoginService {
       };
     }
     // generate cookie - proabbly use JWT later
-    const cookie = `${user._id}:${Date.now()}`;
+    const cookie = await this.authService.generateToken(user._id);
     await this.userService.saveTokenToUser(user, cookie);
-    const decodedState: ILoginRedirectState = await this.authService.decodeToObject(state);
+    const decodedState: IRedirectState = await this.authService.decodeToObject(state);
     return {
       success: {
         user,
         cookie,
+        cookieName: this.configService.get('authCookieName'),
+        redirectUrl: decodedState.redirectUrl,
+      }
+    };
+  }
+
+  async createUserWithEmailAndPassword(
+    body: ICreateUserEmailAndPassword,
+    state: string,
+  ): Promise<ICreateUserEmailAndPasswordOutput> {
+    const user = await this.userService.createUserWithEmailAndPassword(body.email, body.password);
+    const cookie = await this.authService.generateToken(user._id);
+    await this.userService.saveTokenToUser(user, cookie);
+    const decodedState: IRedirectState = await this.authService.decodeToObject(state);
+    return {
+      success: {
+        user,
+        cookie,
+        cookieName: this.configService.get('authCookieName'),
         redirectUrl: decodedState.redirectUrl,
       }
     };
@@ -53,7 +72,7 @@ export class LoginService {
     const redirectUrl = body.redirectUrl;
     // Do check for cookie here itself
     // Create state variable, convert to string and send to login frontend
-    const state: ILoginRedirectState = {
+    const state: IRedirectState = {
       redirectUrl,
     };
     const encodedState = await this.authService.encodeObject(state);

@@ -4,7 +4,7 @@ export interface ILoginRedirectBody {
   redirectUrl: string;
 }
 
-export interface ILoginRedirectState {
+export interface IRedirectState {
   redirectUrl: string;
 }
 
@@ -17,6 +17,7 @@ export interface ILoginEmailAndPasswordOutput {
   success?: {
     user: IUser,
     cookie: string,
+    cookieName: string,
     redirectUrl: string,
   },
   error?: {
@@ -24,6 +25,13 @@ export interface ILoginEmailAndPasswordOutput {
   }
 }
 
+export interface ICreateUserEmailAndPasswordOutput extends ILoginEmailAndPasswordOutput {}
+
 export interface ICreateUserRedirectBody {
   redirectUrl: string;
+}
+
+export interface ICreateUserEmailAndPassword {
+  email: string;
+  password: string;
 }

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
-import { ICreateUserRedirectBody, ILoginEmailAndPassword, ILoginRedirectBody } from "../interfaces/auth.interface";
+import { ICreateUserEmailAndPassword, ICreateUserRedirectBody, ILoginEmailAndPassword, ILoginRedirectBody } from "../interfaces/auth.interface";
 import { LoginService } from "../services/login.service";
 
 @Controller('auth')
@@ -32,8 +32,7 @@ export class AuthController {
     // We should make sure the frontend app passes the state
     const { success, error } = await this.loginService.loginWithEmailAndPassword(body, state);
     if(success) {
-      const cookieName = 'AUTH_COOKIE_NAME';
-      res.cookie(cookieName, success.cookie);
+      res.cookie(success.cookieName, success.cookie);
       res.redirect(success.redirectUrl);
       return;
     } 
@@ -55,11 +54,22 @@ export class AuthController {
   }
 
   @Post('/create-user')
-  async createUser() {
+  async createUser(
+    @Body() body: ICreateUserEmailAndPassword,
+    @Param('state') state: string, 
+    @Res({ passthrough: true }) res: Response,
+  ) {
     // Frontend client app comes here
-    // We receive the creds, create user, and redirect to supplied REDIRECT_URL
     // It gets REDIRECT_URL from the state
-    // Set cookie before returning
+    const { success, error } = await this.loginService.createUserWithEmailAndPassword(body, state);
+    if(success) {
+      res.cookie(success.cookieName, success.cookie);
+      res.redirect(success.redirectUrl);
+      return;
+    } 
+    else {
+      // Handle errors later
+    }
   }
   
   @Get('/get-user')

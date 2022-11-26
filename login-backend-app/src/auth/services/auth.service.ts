@@ -9,6 +9,11 @@ export class AuthService {
     return password === userPassword;
   }
 
+  async generateToken(_id: string) {
+    const cookie = `${_id}:${Date.now()}`;
+    return cookie;
+  }
+
   // In the future, use JWT, or some other encoding/decoding
   async encodeObject(obj: Object) {
     const encodedObject = JSON.stringify(obj);
