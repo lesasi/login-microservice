@@ -1,4 +1,7 @@
-import { Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
+import { Request, Response } from "express";
+import { request } from "http";
+import { ILoginRedirectBody } from "../interfaces/auth.interface";
 import { LoginService } from "../services/login.service";
 
 @Controller('auth')
@@ -7,12 +10,17 @@ export class AuthController {
     private readonly loginService: LoginService,
   ){}
 
+  // Input to body: 
   @Get('/login-redirect')
-  async loginRedirect() {
+  async loginRedirect(
+    @Body() body: ILoginRedirectBody,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     // This will be where the client backend will go to.
     // This will redirect to our login frontend app
-    // We pass a query variable state containing things like REDIRECT_URL, and 
-    // any other variable the client passes
+    const redirectUrl = await this.loginService.loginRedirect(body, req.cookies);
+    res.redirect(redirectUrl);
   }
 
   @Post('/login')
