@@ -73,9 +73,8 @@ export class AuthController {
   }
   
   @Get('/get-user')
-  async getUser() {
-    // This is the endpoint getting user details from the cookie
-    // We'll probably get the entire request itself so we can get the cookie ourself
-    // get user based on cookie and return it
+  async getUser(@Req() req: Request) {
+    const user = await this.loginService.getUserFromCookie(req.cookies);
+    return user;
   }
 }

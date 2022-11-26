@@ -2,11 +2,13 @@ import { Injectable, OnModuleInit } from "@nestjs/common";
 import { IUser } from "../interfaces/user.interface";
 import { UserRepository } from "../repositories/user.repository";
 import { v4 as uuid } from 'uuid';
+import { EncodingService } from "../../utils/services/encoding.service";
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly encodingService: EncodingService,
   ){}
 
   async createUserWithEmailAndPassword(email: string, password: string) {
@@ -24,11 +26,26 @@ export class UserService {
     return this.userRepository.findOne({ email });
   }
 
-  async saveTokenToUser(user: IUser, token: string) {
-    const newUser: IUser = {
+  async generateAndSaveTokenToUser(user: IUser) {
+    // Use JWT to encode it later?
+    const token = await this.encodingService.encodeId(user._id);
+    const updatedUser: IUser = {
       ...user,
       tokens: [...user.tokens, token]
     };
-    await this.userRepository.addOrUpdateEntity(newUser);
+    await this.userRepository.addOrUpdateEntity(updatedUser);
+    return {
+      user,
+      token
+    };
+  }
+
+  async getUserFromToken(token: string) {
+    const _id = await this.encodingService.decodeId(token);
+    const user = await this.userRepository.findOne({
+      _id,
+      tokens: token
+    });
+    return user;
   }
 }
