@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Layout from '../components/layout';
 import utilStyles from '../styles/utils.module.css';
+import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -9,9 +10,15 @@ export default function Home() {
         <title>Login Microservice</title>
       </Head>
       <section className={utilStyles.headingMd}>
-        <p>Home page</p>
+        <Image
+          src="/images/monke.jpg" 
+          className={utilStyles.borderCircle}
+          height={344}
+          width={344}
+          alt="monke"
+        />
         <p>
-          Home page
+          this is the home page
         </p>
       </section>
     </Layout>

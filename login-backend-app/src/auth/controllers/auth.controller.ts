@@ -9,6 +9,16 @@ export class AuthController {
     private readonly loginService: LoginService,
   ){}
 
+  @Get('/sample')
+  async sampleReq(
+    @Body() body,
+  ) {
+    console.log('Sample auth called with body ', body)
+    return {
+      status: 'This is data from backend'
+    };
+  }
+
   // Input to body: 
   @Get('/login-redirect')
   async loginRedirect(

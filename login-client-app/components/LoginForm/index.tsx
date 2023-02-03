@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { ILoginFormInput } from '../types';
+import { ILoginFormInput } from '../../types';
+import loginStyles from './loginform.module.css';
 
 type Props = {
   submitForm: (e: React.FormEvent, formData: ILoginFormInput) => void
@@ -19,17 +20,15 @@ export const LoginForm: React.FC<Props> = ({ submitForm }) => {
   }
 
   return (
-    <form onSubmit={(e) => submitForm(e, formData)}>
-      <div>
-        <div className="form-field">
-          <label htmlFor="username"></label>
+    <form onSubmit={(e) => submitForm(e, formData)} className={loginStyles.formContent}>
+        <div className={loginStyles.formField}>
+          <label htmlFor="username">Username</label>
           <input type="text" id="username" onChange={handleForm}/>
         </div>
-        <div className="form-field">
-          <label htmlFor="password"></label>
+        <div className={loginStyles.formField}>
+          <label htmlFor="password">Password</label>
           <input type="password" id="password" onChange={handleForm}/>
         </div>
-      </div>
       <button 
         className="form-button" 
       >
