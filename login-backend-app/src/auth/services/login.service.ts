@@ -33,7 +33,7 @@ export class LoginService {
     const state: IRedirectState = {
       redirectUrl,
     };
-    const encodedState = await this.encodingService.encodeObject(state);
+    const encodedState = await this.encodingService.encodeObjectToString(state);
     const frontEndUrl = `${this.configService.get('frontEndLoginUrl')}/${frontEndPath}?state=${encodedState}`;
     return frontEndUrl;
   }
@@ -49,7 +49,7 @@ export class LoginService {
       };
     }
     const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
-    const decodedState: IRedirectState = await this.encodingService.decodeToObject(state);
+    const decodedState: IRedirectState = await this.encodingService.decodeStringToObject(state);
     return {
       success: {
         user,
@@ -66,7 +66,7 @@ export class LoginService {
   ): Promise<ICreateUserEmailAndPasswordOutput> {
     const user = await this.userService.createUserWithEmailAndPassword(body.email, body.password);
     const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
-    const decodedState: IRedirectState = await this.encodingService.decodeToObject(state);
+    const decodedState: IRedirectState = await this.encodingService.decodeStringToObject(state);
     return {
       success: {
         user,

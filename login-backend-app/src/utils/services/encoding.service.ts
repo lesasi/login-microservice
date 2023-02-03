@@ -4,8 +4,8 @@ import { Injectable } from "@nestjs/common";
 export class EncodingService {
   constructor() {}
 
-    // In future, use JWT or any other verifying library
-    async encodeId(_id: string) {
+  // In future, use JWT or any other verifying library
+  async encodeId(_id: string) {
     const token = `${_id}:${Date.now()}`;
     return token;
   }
@@ -21,12 +21,12 @@ export class EncodingService {
   }
 
   // In the future, use JWT, or some other encoding/decoding
-  async encodeObject(obj: Object) {
+  async encodeObjectToString(obj: Object) {
     const encodedObject = JSON.stringify(obj);
     return encodedObject;
   }
 
-  async decodeToObject(state: string) {
+  async decodeStringToObject(state: string) {
     const decodedObject = JSON.parse(state);
     return decodedObject;
   }
