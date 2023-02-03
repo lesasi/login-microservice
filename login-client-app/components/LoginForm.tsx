@@ -23,7 +23,7 @@ export const LoginForm: React.FC<Props> = ({ submitForm }) => {
       <div>
         <div className="form-field">
           <label htmlFor="username"></label>
-          <input type="text" id="text" onChange={handleForm}/>
+          <input type="text" id="username" onChange={handleForm}/>
         </div>
         <div className="form-field">
           <label htmlFor="password"></label>
