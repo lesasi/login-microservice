@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { UserService } from "../../user/services/user.service";
-import { ICreateUserEmailAndPassword, ICreateUserEmailAndPasswordOutput, ICreateUserRedirectBody, ILoginEmailAndPassword, ILoginEmailAndPasswordOutput, ILoginRedirectBody, IRedirectState } from "../interfaces/auth.interface";
+import { IAPIResult, ICreateUserEmailAndPassword, ICreateUserRedirectBody, IEmailPasswordFlowOutput, ILoginEmailAndPassword, ILoginRedirectBody, IRedirectState } from "../interfaces/auth.interface";
 import { EncodingService } from "../../utils/services/encoding.service";
 
 @Injectable()
@@ -38,8 +38,15 @@ export class LoginService {
     return frontEndUrl;
   }
 
-  async loginWithEmailAndPassword(body: ILoginEmailAndPassword, state: string): Promise<ILoginEmailAndPasswordOutput> {
+  async loginWithEmailAndPassword(body: ILoginEmailAndPassword, state: string): Promise<IAPIResult<IEmailPasswordFlowOutput>> {
     const user = await this.userService.getUserByEmail(body.email);
+    if(!user) {
+      return {
+        error: {
+          message: `User not found with email ${body.email}`
+        }
+      };
+    }
     const isSame = await this.encodingService.comparePassword(body.password, user.password);
     if(!isSame) {
       return {
@@ -63,7 +70,7 @@ export class LoginService {
   async createUserWithEmailAndPassword(
     body: ICreateUserEmailAndPassword,
     state: string,
-  ): Promise<ICreateUserEmailAndPasswordOutput> {
+  ): Promise<IAPIResult<IEmailPasswordFlowOutput>> {
     const user = await this.userService.createUserWithEmailAndPassword(body.email, body.password);
     const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
     const decodedState: IRedirectState = await this.encodingService.decodeStringToObject(state);

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { ICreateUserEmailAndPassword, ICreateUserRedirectBody, ILoginEmailAndPassword, ILoginRedirectBody } from "../interfaces/auth.interface";
 import { LoginService } from "../services/login.service";
@@ -20,7 +20,7 @@ export class AuthController {
   }
 
   // Input to body: 
-  @Get('/login-redirect')
+  @Post('/login-redirect')
   async loginRedirect(
     @Body() body: ILoginRedirectBody,
     @Req() req: Request,
@@ -35,7 +35,7 @@ export class AuthController {
   @Post('/login')
   async login(
     @Body() body: ILoginEmailAndPassword,
-    @Param('state') state: string, 
+    @Query('state') state: string, 
     @Res({ passthrough: true }) res: Response,
   ) {
     // After entering email/password, login frontend will hit this
@@ -48,6 +48,9 @@ export class AuthController {
     } 
     else {
       // Handle errors later
+      return {
+        error
+      };
     }
   }
 

@@ -13,19 +13,19 @@ export interface ILoginEmailAndPassword {
   password: string;
 }
 
-export interface ILoginEmailAndPasswordOutput {
-  success?: {
-    user: IUser,
-    cookie: string,
-    cookieName: string,
-    redirectUrl: string,
-  },
+export interface IAPIResult<T> {
+  success?: T,
   error?: {
     message: string;
   }
 }
 
-export interface ICreateUserEmailAndPasswordOutput extends ILoginEmailAndPasswordOutput {}
+export interface IEmailPasswordFlowOutput {
+  user: IUser,
+  cookie: string,
+  cookieName: string,
+  redirectUrl: string,
+}
 
 export interface ICreateUserRedirectBody {
   redirectUrl: string;

@@ -5,29 +5,32 @@ import { CustomForm } from "../../components/CustomForm";
 import { AllowedFormInputTypes, IFormItem } from "../../components/CustomForm/types";
 import styles from './create-user.module.css';
 import { ICreateUserInput } from "../../types/create-user.interface";
+import { createUser } from "../../actions/user-login";
+import { GetServerSideProps } from "next/types";
 
 const formItems: IFormItem[] = [
-  { id: 'username', inputType: AllowedFormInputTypes.text, label: 'Username:', required: true },
+  { id: 'email', inputType: AllowedFormInputTypes.text, label: 'Email:', required: true },
   { id: 'password', inputType: AllowedFormInputTypes.password, label: 'Password:', required: true },
 ];
 
-export default () => {
+export default ({ data: { query } }) => {
   const [formData, setFormData] = React.useState<ICreateUserInput>({
-    username: '',
+    email: '',
     password: ''
   });
   const [currentStep, setCurrentStep] =  React.useState<number>(0);
 
-  const submitUsername = (e: React.FormEvent, data: { username: string }) => {
+  const submitUsername = (e: React.FormEvent, data: { email: string }) => {
     e.preventDefault();
-    setFormData({ ...formData, username: data.username });
+    setFormData({ ...formData, email: data.email });
     setCurrentStep(1);
   }
 
-  const submitForm = (e: React.FormEvent, data: { password: string }) => {
+  const submitForm = async (e: React.FormEvent, data: { password: string }) => {
     e.preventDefault();
     setFormData({ ...formData, password: data.password });
-    console.log('formData create ', data, formData)
+    const response = await createUser(formData, query);
+    console.log('response ', response);
   }
 
   const reduceStepNumber = (e: React.FormEvent) => {
@@ -50,7 +53,7 @@ export default () => {
           {'<<'}
         </div>
         {
-          ['Set Username', 'Set Password'].map((item, index) => {
+          ['Set Email', 'Set Password'].map((item, index) => {
             let classNames = [styles.createUserStatusTabItem];
             if(currentStep === index) { classNames = [styles.createUserStatusTabItem, styles.backgroundColorGreen]; }
             return (
@@ -64,8 +67,8 @@ export default () => {
           currentStep === 0 ? 
             (
               <div>
-                <h2 className={styles.formItemHeading}>Write username</h2>
-                <CustomForm key={currentStep} formItems={[{...formItems[0], defaultValue: formData.username }]} submitForm={submitUsername} submitButtonLabel='Next' />
+                <h2 className={styles.formItemHeading}>Write email</h2>
+                <CustomForm key={currentStep} formItems={[{...formItems[0], defaultValue: formData.email }]} submitForm={submitUsername} submitButtonLabel='Next' />
               </div>
             ):
             (
@@ -78,4 +81,15 @@ export default () => {
       </div>
     </Layout>
   );
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const query = context.query;
+  return {
+    props: {
+      data: {
+        query
+      }
+    }
+  };
 }
