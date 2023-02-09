@@ -5,13 +5,14 @@ import { IFormItem } from './types';
 type Props = {
   submitForm: (e: React.FormEvent, formData: any) => void;
   formItems: IFormItem[];
+  submitButtonLabel?: string;
 }
 
-export const CustomForm: React.FC<Props> = ({ submitForm, formItems }) => {
+export const CustomForm: React.FC<Props> = ({ submitForm, formItems, submitButtonLabel }) => {
   const defaultState = formItems.reduce((acc, item) => {
     return {
       ...acc,
-      [item.id]: item.defaultValue
+      [item.id]: item.defaultValue || ''
     };
   }, {});
   const [formData, setFormData] = React.useState(defaultState);
@@ -30,7 +31,13 @@ export const CustomForm: React.FC<Props> = ({ submitForm, formItems }) => {
           return (
             <div key={item.id} className={formStyle.formField}>
               <label htmlFor={item.id}>{item.label}</label>
-              <input type={item.inputType} id={item.id} onChange={handleFormItem}/>
+              <input 
+                id={item.id} 
+                value={formData[item.id]}
+                required={!!item.required}
+                type={item.inputType} 
+                onChange={handleFormItem}
+              />
             </div>
           );
         })
@@ -38,7 +45,7 @@ export const CustomForm: React.FC<Props> = ({ submitForm, formItems }) => {
       <button 
         className="form-button" 
       >
-        Submit
+        { submitButtonLabel || 'Submit' }
       </button>
     </form>
   );

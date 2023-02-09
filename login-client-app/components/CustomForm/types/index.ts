@@ -6,6 +6,7 @@ export enum AllowedFormInputTypes {
 export interface IFormItem {
   id: string;
   label: string;
+  required?: boolean;
   inputType: AllowedFormInputTypes;
   defaultValue?: string;
 }

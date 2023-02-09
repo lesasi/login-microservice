@@ -16,6 +16,11 @@ export default function Layout({ children }) {
             Login page
           </Link>
         </h2>
+        <h2 className={utilStyles.headingLg}>
+          <Link href="/create-user" className={utilStyles.colorInherit}>
+            Create user page
+          </Link>
+        </h2>
       </header>
       <main>{children}</main>
     </div>
