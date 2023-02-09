@@ -1,9 +1,15 @@
 import Head from "next/head";
 import { GetServerSideProps } from "next/types";
 import React from "react";
+import { CustomForm } from "../../components/CustomForm";
+import { AllowedFormInputTypes, IFormItem } from "../../components/CustomForm/types";
 import Layout from "../../components/layout";
-import { LoginForm } from "../../components/LoginForm";
 import { ILoginFormInput } from "../../types";
+
+const formItems: IFormItem[] = [
+  { id: 'username', inputType: AllowedFormInputTypes.text, label: 'Username:', defaultValue: '' },
+  { id: 'password', inputType: AllowedFormInputTypes.password, label: 'Password:', defaultValue: '' },
+];
 
 export default ({ data: { processedData, query1 } }) => {
   const submitForm = (e: React.FormEvent, formData: ILoginFormInput) => {
@@ -18,7 +24,7 @@ export default ({ data: { processedData, query1 } }) => {
         <title>Login page</title>
       </Head>
       <div>
-        <LoginForm submitForm={submitForm}/>
+        <CustomForm formItems={formItems} submitForm={submitForm} />
       </div>
     </Layout>
   );
