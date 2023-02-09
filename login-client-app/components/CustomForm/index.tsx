@@ -3,7 +3,7 @@ import formStyle from './custom-form.module.css';
 import { IFormItem } from './types';
 
 type Props = {
-  submitForm: (e: React.FormEvent, formData: any) => void;
+  submitForm: (e: React.FormEvent, data: any) => void;
   formItems: IFormItem[];
   submitButtonLabel?: string;
 }
@@ -15,9 +15,9 @@ export const CustomForm: React.FC<Props> = ({ submitForm, formItems, submitButto
       [item.id]: item.defaultValue || ''
     };
   }, {});
-  const [formData, setFormData] = React.useState(defaultState);
+  const [formData, setFormData] = React.useState(defaultState);  
 
-  const handleFormItem = (e: React.FormEvent<HTMLInputElement>): void => {
+  const handleFormItem = (e: React.FormEvent<HTMLInputElement>): void => {  
     setFormData({
       ...formData,
       [e.currentTarget.id]: e.currentTarget.value,

@@ -26,7 +26,8 @@ export default () => {
 
   const submitForm = (e: React.FormEvent, data: { password: string }) => {
     e.preventDefault();
-    console.log('formdata create ', formData)
+    setFormData({ ...formData, username: data.password });
+    console.log('formData create ', data, formData)
   }
 
   const reduceStepNumber = (e: React.FormEvent) => {
@@ -64,13 +65,13 @@ export default () => {
             (
               <div>
                 <h2 className={styles.formItemHeading}>Write username</h2>
-                <CustomForm formItems={[formItems[0]]} submitForm={submitUsername} submitButtonLabel='Next' />
+                <CustomForm key={currentStep} formItems={[formItems[0]]} submitForm={submitUsername} submitButtonLabel='Next' />
               </div>
             ):
             (
               <div>
                 <h2 className={styles.formItemHeading}>Write password</h2>
-                <CustomForm formItems={[formItems[1]]} submitForm={submitForm} />
+                <CustomForm key={currentStep} formItems={[formItems[1]]} submitForm={submitForm} />
               </div>
             )
         }
