@@ -7,8 +7,8 @@ import styles from './create-user.module.css';
 import { ICreateUserInput } from "../../types/create-user.interface";
 
 const formItems: IFormItem[] = [
-  { id: 'username', inputType: AllowedFormInputTypes.text, label: 'Username:', defaultValue: '', required: true },
-  { id: 'password', inputType: AllowedFormInputTypes.password, label: 'Password:', defaultValue: '', required: true },
+  { id: 'username', inputType: AllowedFormInputTypes.text, label: 'Username:', required: true },
+  { id: 'password', inputType: AllowedFormInputTypes.password, label: 'Password:', required: true },
 ];
 
 export default () => {
@@ -26,7 +26,7 @@ export default () => {
 
   const submitForm = (e: React.FormEvent, data: { password: string }) => {
     e.preventDefault();
-    setFormData({ ...formData, username: data.password });
+    setFormData({ ...formData, password: data.password });
     console.log('formData create ', data, formData)
   }
 
@@ -65,13 +65,13 @@ export default () => {
             (
               <div>
                 <h2 className={styles.formItemHeading}>Write username</h2>
-                <CustomForm key={currentStep} formItems={[formItems[0]]} submitForm={submitUsername} submitButtonLabel='Next' />
+                <CustomForm key={currentStep} formItems={[{...formItems[0], defaultValue: formData.username }]} submitForm={submitUsername} submitButtonLabel='Next' />
               </div>
             ):
             (
               <div>
                 <h2 className={styles.formItemHeading}>Write password</h2>
-                <CustomForm key={currentStep} formItems={[formItems[1]]} submitForm={submitForm} />
+                <CustomForm key={currentStep} formItems={[{...formItems[1], defaultValue: formData.password }]} submitForm={submitForm} />
               </div>
             )
         }

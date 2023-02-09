@@ -12,7 +12,7 @@ export default function Layout({ children }) {
           </Link>
         </h2>
         <h2 className={utilStyles.headingLg}>
-          <Link href="/login" className={utilStyles.colorInherit}>
+          <Link href="/login-user" className={utilStyles.colorInherit}>
             Login page
           </Link>
         </h2>

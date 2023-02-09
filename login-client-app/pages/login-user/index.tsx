@@ -4,7 +4,7 @@ import React from "react";
 import { CustomForm } from "../../components/CustomForm";
 import { AllowedFormInputTypes, IFormItem } from "../../components/CustomForm/types";
 import Layout from "../../components/layout";
-import { ILoginFormInput } from "../../types";
+import { ILoginFormInput } from "../../types/login-user";
 
 const formItems: IFormItem[] = [
   { id: 'username', inputType: AllowedFormInputTypes.text, label: 'Username:', defaultValue: '' },
