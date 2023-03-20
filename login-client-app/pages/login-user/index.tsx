@@ -15,8 +15,10 @@ const formItems: IFormItem[] = [
 export default ({ data: { processedData, query } }) => {
   const submitForm = async (e: React.FormEvent, formData: ILoginFormInput) => {
     e.preventDefault()
-    const response = await loginUser(formData, query);
+    // TODO: create type for output
+    const response = await loginUser<{ url: string }>(formData, query);
     console.log('response ', response);
+    window.location.href = response.url;
   }
   return (
     <Layout>

@@ -51,7 +51,7 @@ export class LoginService {
     if(!isSame) {
       return {
         error: {
-          message: 'Username or password is not correct'
+          message: 'Password is not correct'
         }
       };
     }
@@ -84,10 +84,8 @@ export class LoginService {
     };
   }
 
-  async getUserDetailsFromCookie(cookies: Record<string, string>) {
-    const authCookieName = this.configService.get('authCookieName');
-    const token = cookies[authCookieName];
-    const { _id, email } = await this.userService.getUserFromToken(token);
+  async getUserDetailsFromCookie(cookie: string) {
+    const { _id, email } = await this.userService.getUserFromToken(cookie);
     return {
       _id,
       email

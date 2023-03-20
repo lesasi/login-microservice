@@ -4,7 +4,14 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  console.log('process.env.FRONTEND_LOGIN_URL ', process.env.FRONTEND_LOGIN_URL)
+  app.enableCors({
+    origin: [`${process.env.FRONTEND_LOGIN_URL}`, 'https://www.google.com'],
+    // credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    optionsSuccessStatus: 200,
+    maxAge: 3600,
+  });
   const configService = app.get(ConfigService) as ConfigService<any>;
   const port = configService.get('port');
   await app.listen(port);

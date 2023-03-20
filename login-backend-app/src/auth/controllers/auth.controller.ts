@@ -28,8 +28,11 @@ export class AuthController {
   ) {
     // This will be where the client backend will go to.
     // This will redirect to our login frontend app
-    const redirectUrl = await this.loginService.loginRedirect(body, req.cookies);
-    res.redirect(redirectUrl);
+    const url = await this.loginService.loginRedirect(body, req.cookies);
+    // TODO: add parameters like status (whether to login or not), error message etc.
+    res.send({
+      url
+    });
   }
 
   @Post('/login')
@@ -42,9 +45,12 @@ export class AuthController {
     // We should make sure the frontend app passes the state
     const { success, error } = await this.loginService.loginWithEmailAndPassword(body, state);
     if(success) {
-      res.cookie(success.cookieName, success.cookie);
-      res.redirect(success.redirectUrl);
-      return;
+      const url = `${success.redirectUrl}?
+        cookie=${success.cookie}&
+        user_id=${success.user._id}`;
+      return {
+        url
+      };
     } 
     else {
       // Handle errors later
@@ -62,8 +68,11 @@ export class AuthController {
   ) {
     // Client create endpoint comes here
     // We redirect to our create user frontend app
-    const redirectUrl = await this.loginService.createUserRedirect(body, req.cookies);
-    res.redirect(redirectUrl);
+    const url = await this.loginService.createUserRedirect(body, req.cookies);
+    // TODO: add parameters like status (whether to login or not), error message etc.
+    res.send({
+      url
+    });
   }
 
   @Post('/create-user')
@@ -76,9 +85,12 @@ export class AuthController {
     // It gets REDIRECT_URL from the state
     const { success, error } = await this.loginService.createUserWithEmailAndPassword(body, state);
     if(success) {
-      res.cookie(success.cookieName, success.cookie);
-      res.redirect(success.redirectUrl);
-      return;
+      const url = `${success.redirectUrl}?
+        cookie=${success.cookie}&
+        user_id=${success.user._id}`;
+      return {
+        url
+      };
     } 
     else {
       // Handle errors later
@@ -86,8 +98,8 @@ export class AuthController {
   }
   
   @Get('/get-user')
-  async getUser(@Req() req: Request) {
-    const userDetails = await this.loginService.getUserDetailsFromCookie(req.cookies);
+  async getUser(@Query('cookie') cookie: string) {
+    const userDetails = await this.loginService.getUserDetailsFromCookie(cookie);
     return userDetails;
   }
 
