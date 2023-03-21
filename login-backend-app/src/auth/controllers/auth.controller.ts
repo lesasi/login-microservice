@@ -102,13 +102,26 @@ export class AuthController {
   
   @Get('/get-user')
   async getUser(@Query('cookie') cookie: string) {
-    const userDetails = await this.loginService.getUserDetailsFromCookie(cookie);
-    return userDetails;
+    const { success, error } = await this.loginService.getUserDetailsFromCookie(cookie);
+    if(success) {
+      return success;
+    }
+    else {
+      return {
+        error
+      };
+    }
   }
 
   @Get('/logout')
-  async logout(@Req() req: Request) {
-    const user = await this.loginService.logoutUser(req.cookies);
-    return user._id;
+  async logout(@Query('cookie') cookie: string) {
+    try {
+      const user = await this.loginService.logoutUser(cookie);
+      return user._id;
+    } catch (error) {
+      return {
+        error: error.message,
+      };
+    }
   }
 }

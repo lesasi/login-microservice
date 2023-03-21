@@ -43,7 +43,10 @@ export class LoginService {
       console.log('\n\n\n Login usr Body: ', body)
       const user = await this.userService.getUserByEmailAndPassword(body.email, body.password);
       const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
-      const decodedState: IRedirectState = await this.encodingService.decodeStringToObject(state);
+      const { success: decodedState, error } = await this.encodingService.decodeStringToObject<IRedirectState>(state);
+      if(error) {
+        throw new Error('Invalid state provided');
+      }
       return {
         success: {
           user,
@@ -69,7 +72,10 @@ export class LoginService {
       console.log('\n\n\n Create usr Body: ', body)
       const user = await this.userService.createUserWithEmailAndPassword(body.email, body.password);
       const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
-      const decodedState: IRedirectState = await this.encodingService.decodeStringToObject(state);
+      const { success: decodedState, error } = await this.encodingService.decodeStringToObject<IRedirectState>(state);
+      if(error) {
+        throw new Error('Invalid state provided');
+      }
       return {
         success: {
           user,
@@ -87,17 +93,23 @@ export class LoginService {
     }
   }
 
-  async getUserDetailsFromCookie(cookie: string) {
-    const { _id, email } = await this.userService.getUserFromToken(cookie);
-    return {
-      _id,
-      email
-    };
+  async getUserDetailsFromCookie(cookie: string): Promise<IAPIResult<{ _id: string, email: string }>>  {
+    try {
+      const { _id, email } = await this.userService.getUserFromToken(cookie);
+      return {
+        success: {
+          _id,
+          email
+        }
+      };
+    } catch (error) {
+      return {
+        error: error.message,
+      };
+    }
   }
 
-  async logoutUser(cookies: Record<string, string>) {
-    const authCookieName = this.configService.get('authCookieName');
-    const token = cookies[authCookieName];
+  async logoutUser(token: string) {
     const { user } = await this.userService.removeTokenFromUser(token);
     return user;
   }

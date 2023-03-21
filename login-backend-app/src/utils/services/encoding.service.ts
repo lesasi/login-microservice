@@ -40,14 +40,18 @@ export class EncodingService {
     return encodedObject;
   }
 
-  async decodeStringToObject(s: string) {
+  async decodeStringToObject<T>(s: string) {
     const jwtSecret = this.configService.get('jwtSecret');
-    const verified = jwt.verify(s, jwtSecret);
-    if(!verified) {
-      throw new Error('Received invalid encoded object');
+    try {
+      const verified = jwt.verify(s, jwtSecret);
+      console.log('decoded object ', verified)
+      return {
+        success: verified as T,
+      };
+    } catch (error) {
+      return {
+        error: 'INVALID_JWT_SIGNATURE'
+      };
     }
-    const decodedObject = jwt.decode(s);
-    console.log('decoded object ', decodedObject)
-    return decodedObject as any;
   }
 }

@@ -54,11 +54,17 @@ export class UserService {
   }
 
   async getUserFromToken(token: string) {
-    const { _id } = await this.encodingService.decodeStringToObject(token);
-    const user = await this.userRepository.findOne({
-      _id,
-      tokens: token
-    });
+    const { success, error } = await this.encodingService.decodeStringToObject<{ _id: string }>(token);
+    let user: IUser;
+    if(success) {
+      user = await this.userRepository.findOne({
+        _id: success._id,
+        tokens: token
+      });
+    }
+    if((error && error === 'INVALID_JWT_SIGNATURE') || !user) {
+      throw new Error('Invalid token/cookie supplied, user not verified');
+    }
     return user;
   }
 
