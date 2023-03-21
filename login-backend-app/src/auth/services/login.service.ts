@@ -39,49 +39,52 @@ export class LoginService {
   }
 
   async loginWithEmailAndPassword(body: ILoginEmailAndPassword, state: string): Promise<IAPIResult<IEmailPasswordFlowOutput>> {
-    const user = await this.userService.getUserByEmail(body.email);
-    if(!user) {
+    try {
+      console.log('\n\n\n Login usr Body: ', body)
+      const user = await this.userService.getUserByEmailAndPassword(body.email, body.password);
+      const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
+      const decodedState: IRedirectState = await this.encodingService.decodeStringToObject(state);
+      return {
+        success: {
+          user,
+          cookie,
+          cookieName: this.configService.get('authCookieName'),
+          redirectUrl: decodedState.redirectUrl,
+        }
+      };
+    } catch (error) {
       return {
         error: {
-          message: `User not found with email ${body.email}`
+          message: error.message,
         }
       };
     }
-    const isSame = await this.encodingService.comparePassword(body.password, user.password);
-    if(!isSame) {
-      return {
-        error: {
-          message: 'Password is not correct'
-        }
-      };
-    }
-    const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
-    const decodedState: IRedirectState = await this.encodingService.decodeStringToObject(state);
-    return {
-      success: {
-        user,
-        cookie,
-        cookieName: this.configService.get('authCookieName'),
-        redirectUrl: decodedState.redirectUrl,
-      }
-    };
   }
 
   async createUserWithEmailAndPassword(
     body: ICreateUserEmailAndPassword,
     state: string,
   ): Promise<IAPIResult<IEmailPasswordFlowOutput>> {
-    const user = await this.userService.createUserWithEmailAndPassword(body.email, body.password);
-    const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
-    const decodedState: IRedirectState = await this.encodingService.decodeStringToObject(state);
-    return {
-      success: {
-        user,
-        cookie,
-        cookieName: this.configService.get('authCookieName'),
-        redirectUrl: decodedState.redirectUrl,
-      }
-    };
+    try {
+      console.log('\n\n\n Create usr Body: ', body)
+      const user = await this.userService.createUserWithEmailAndPassword(body.email, body.password);
+      const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
+      const decodedState: IRedirectState = await this.encodingService.decodeStringToObject(state);
+      return {
+        success: {
+          user,
+          cookie,
+          cookieName: this.configService.get('authCookieName'),
+          redirectUrl: decodedState.redirectUrl,
+        }
+      };
+    } catch (error) {
+      return {
+        error: {
+          message: error.message,
+        }
+      };
+    }
   }
 
   async getUserDetailsFromCookie(cookie: string) {

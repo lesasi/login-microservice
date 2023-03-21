@@ -29,10 +29,19 @@ export default ({ data: { query } }) => {
   const submitForm = async (e: React.FormEvent, data: { password: string }) => {
     e.preventDefault();
     setFormData({ ...formData, password: data.password });
+    const submittedFormData = {
+      ...formData,
+      password: data.password,
+    };
     // TODO: create type for output
-    const response = await createUser<{ url: string }>(formData, query);
-    console.log('response ', response);
-    window.location.href = response.url;
+    const response = await createUser<{ url: string, error: { message: string }}>(submittedFormData, query);
+    if(response.url) {
+      window.location.href = response.url;
+    }
+    else {
+      // Handle errors later
+      console.log('error: ', response.error)
+    }
   }
 
   const reduceStepNumber = (e: React.FormEvent) => {

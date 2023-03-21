@@ -12,22 +12,36 @@ export class UserService {
   ){}
 
   async createUserWithEmailAndPassword(email: string, password: string) {
+    const existingUser = await this.userRepository.findOne({ email });
+    if(existingUser) {
+      throw new Error(`User with email ${email} already exists!`);
+    }
+    const encodedPassword = await this.encodingService.createHashFromString(password);
     const user: IUser = {
       _id: uuid(),
       email,
-      password,
+      password: encodedPassword,
       tokens: []
     };
     await this.userRepository.addOrUpdateEntity(user);
     return user;
   }
 
-  async getUserByEmail(email: string): Promise<IUser> {
-    return this.userRepository.findOne({ email });
+  async getUserByEmailAndPassword(email: string, password: string): Promise<IUser> {
+    const user = await this.userRepository.findOne({ email });
+    if(!user) {
+      throw new Error(`User not found with email ${email}`);
+    }
+    const isSame = await this.encodingService.compareStringWithHash(password, user.password);
+    if(!isSame) {
+      throw new Error('Password is not correct');
+    }
+    console.log('Fetched user: ', user)
+    return user;
   }
 
   async generateAndSaveTokenToUser(user: IUser) {
-    const token = await this.encodingService.encodeId(user._id);
+    const token = await this.encodingService.encodeObjectToString({ _id: user._id });
     const updatedUser: IUser = {
       ...user,
       tokens: [...user.tokens, token]
@@ -40,7 +54,7 @@ export class UserService {
   }
 
   async getUserFromToken(token: string) {
-    const _id = await this.encodingService.decodeId(token);
+    const { _id } = await this.encodingService.decodeStringToObject(token);
     const user = await this.userRepository.findOne({
       _id,
       tokens: token

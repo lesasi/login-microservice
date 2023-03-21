@@ -16,9 +16,14 @@ export default ({ data: { processedData, query } }) => {
   const submitForm = async (e: React.FormEvent, formData: ILoginFormInput) => {
     e.preventDefault()
     // TODO: create type for output
-    const response = await loginUser<{ url: string }>(formData, query);
-    console.log('response ', response);
-    window.location.href = response.url;
+    const response = await loginUser<{ url: string, error: { message: string } }>(formData, query);
+    if(response.url) {
+      window.location.href = response.url;
+    }
+    else {
+      // Handle errors later
+      console.log('error: ', response.error)
+    }
   }
   return (
     <Layout>

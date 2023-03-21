@@ -4,5 +4,6 @@ export default () => {
     mongoConnectionString: process.env.MONGO_CONNECTION_STRING,
     frontEndLoginUrl: process.env.FRONTEND_LOGIN_URL,
     authCookieName: process.env.AUTH_COOKIE_NAME,
-  }
+    jwtSecret: process.env.JWT_SECRET,
+  };
 }

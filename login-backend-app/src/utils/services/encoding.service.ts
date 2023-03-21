@@ -1,33 +1,53 @@
 import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class EncodingService {
-  constructor() {}
+  constructor(
+    protected readonly configService: ConfigService,
+  ) {}
 
   // In future, use JWT or any other verifying library
   async encodeId(_id: string) {
+    const jwtSecret = this.configService.get('jwtSecret');
     const token = `${_id}:${Date.now()}`;
     return token;
   }
 
   async decodeId(hash: string) {
+    const jwtSecret = this.configService.get('jwtSecret');
     const _id = hash.split(':')[0];
     return _id;
   }
+
+  async createHashFromString(s: string) {
+    const hash = await bcrypt.hash(s, 10);
+    return hash;
+  }
   
   // Comparison of passwords - in future, use Hashes
-  async comparePassword(password: string, userPassword: string) {
-    return password === userPassword;
+  async compareStringWithHash(s: string, hash: string) {
+    const result = await bcrypt.compare(s, hash);
+    return result;
   }
 
   // In the future, use JWT, or some other encoding/decoding
   async encodeObjectToString(obj: Object) {
-    const encodedObject = JSON.stringify(obj);
+    const jwtSecret: string = this.configService.get('jwtSecret');
+    const encodedObject = jwt.sign(obj, jwtSecret);
     return encodedObject;
   }
 
-  async decodeStringToObject(state: string) {
-    const decodedObject = JSON.parse(state);
-    return decodedObject;
+  async decodeStringToObject(s: string) {
+    const jwtSecret = this.configService.get('jwtSecret');
+    const verified = jwt.verify(s, jwtSecret);
+    if(!verified) {
+      throw new Error('Received invalid encoded object');
+    }
+    const decodedObject = jwt.decode(s);
+    console.log('decoded object ', decodedObject)
+    return decodedObject as any;
   }
 }

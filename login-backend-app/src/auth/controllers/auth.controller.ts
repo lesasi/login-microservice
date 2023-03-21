@@ -60,7 +60,7 @@ export class AuthController {
     }
   }
 
-  @Get('/create-user-redirect')
+  @Post('/create-user-redirect')
   async createUserRedirect(
     @Body() body: ICreateUserRedirectBody,
     @Req() req: Request,
@@ -78,7 +78,7 @@ export class AuthController {
   @Post('/create-user')
   async createUser(
     @Body() body: ICreateUserEmailAndPassword,
-    @Param('state') state: string, 
+    @Query('state') state: string, 
     @Res({ passthrough: true }) res: Response,
   ) {
     // Frontend client app comes here
@@ -94,6 +94,9 @@ export class AuthController {
     } 
     else {
       // Handle errors later
+      return {
+        error
+      };
     }
   }
   
