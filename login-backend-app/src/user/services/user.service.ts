@@ -39,7 +39,6 @@ export class UserService {
     if(!isSame) {
       throw new Error('Password is not correct');
     }
-    console.log('Fetched user: ', user)
     return user;
   }
 

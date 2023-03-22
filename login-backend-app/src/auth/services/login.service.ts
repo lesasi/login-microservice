@@ -40,7 +40,6 @@ export class LoginService {
 
   async loginWithEmailAndPassword(body: ILoginEmailAndPassword, state: string): Promise<IAPIResult<IEmailPasswordFlowOutput>> {
     try {
-      console.log('\n\n\n Login usr Body: ', body)
       const user = await this.userService.getUserByEmailAndPassword(body.email, body.password);
       const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
       const { success: decodedState, error } = await this.encodingService.decodeStringToObject<IRedirectState>(state);
@@ -69,7 +68,6 @@ export class LoginService {
     state: string,
   ): Promise<IAPIResult<IEmailPasswordFlowOutput>> {
     try {
-      console.log('\n\n\n Create usr Body: ', body)
       const user = await this.userService.createUserWithEmailAndPassword(body.email, body.password);
       const { token: cookie } = await this.userService.generateAndSaveTokenToUser(user);
       const { success: decodedState, error } = await this.encodingService.decodeStringToObject<IRedirectState>(state);

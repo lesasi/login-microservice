@@ -44,7 +44,6 @@ export class EncodingService {
     const jwtSecret = this.configService.get('jwtSecret');
     try {
       const verified = jwt.verify(s, jwtSecret);
-      console.log('decoded object ', verified)
       return {
         success: verified as T,
       };
