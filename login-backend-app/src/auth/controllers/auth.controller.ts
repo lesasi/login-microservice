@@ -45,9 +45,7 @@ export class AuthController {
     // We should make sure the frontend app passes the state
     const { success, error } = await this.loginService.loginWithEmailAndPassword(body, state);
     if(success) {
-      const url = `${success.redirectUrl}?
-        cookie=${success.cookie}&
-        user_id=${success.user._id}`;
+      const url = `${success.redirectUrl}?cookie=${success.cookie}&user_id=${success.user._id}`;
       return {
         url
       };
@@ -85,9 +83,7 @@ export class AuthController {
     // It gets REDIRECT_URL from the state
     const { success, error } = await this.loginService.createUserWithEmailAndPassword(body, state);
     if(success) {
-      const url = `${success.redirectUrl}?
-        cookie=${success.cookie}&
-        user_id=${success.user._id}`;
+      const url = `${success.redirectUrl}?cookie=${success.cookie}&user_id=${success.user._id}`;
       return {
         url
       };
