@@ -23,7 +23,10 @@ export class UserService {
       password: encodedPassword,
       tokens: []
     };
-    await this.userRepository.addOrUpdateEntity(user);
+    const saveStatus = await this.userRepository.addOrUpdateEntity(user);
+    if(!saveStatus.status) {
+      throw new Error(saveStatus.errors.map(e => e.constraintsBroken.join(',')).join(','));
+    }
     return user;
   }
 
