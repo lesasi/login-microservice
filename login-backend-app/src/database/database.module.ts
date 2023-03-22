@@ -8,6 +8,7 @@ const connection = {
   useFactory: async (configService: ConfigService) => {
     try {
       const mongoConnectionUrl = configService.get('mongoConnectionString');
+      console.log('Mongo connection ', mongoConnectionUrl)
       return await MongoClient.connect(mongoConnectionUrl, { maxPoolSize: 2 });
     } catch (error) {
       console.error(error);

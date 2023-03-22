@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  login_microservice_mongo_db:
+    image: mongo
+    container_name: login_microservice_mongo_db
+    hostname: login_microservice_mongo_db
+    ports:
+      - "27020:27017"
+    volumes:
+      - login_microservice_db:/data/db
+    restart: always
+
+  login_microservice_backend:
+    restart: always
+    image: login-microservice-backend:latest
+    container_name: login_microservice_backend
+    volumes:
+      - ./login-backend-app/:/var/www/html/login-microservice-backend
+    command: yarn start:dev
+    ports:
+      - 8001:8001
+    depends_on:
+      - login_microservice_mongo_db
+  
+  login_microservice_client:
+    restart: always
+    image: login-microservice-client:latest
+    container_name: login_microservice_client
+    volumes:
+      - ./login-client-app/:/var/www/html/login-microservice-client
+    command: yarn dev
+    ports:
+      - 8000:8000
+    depends_on:
+      - login_microservice_mongo_db
+
+volumes:
+    login_microservice_db:
