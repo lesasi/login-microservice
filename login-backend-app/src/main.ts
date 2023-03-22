@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   console.log('process.env.FRONTEND_LOGIN_URL ', process.env.FRONTEND_LOGIN_URL)
   app.enableCors({
-    origin: [`${process.env.FRONTEND_LOGIN_URL}`, 'https://www.google.com'],
+    origin: [`${process.env.FRONTEND_LOGIN_URL}`],
     // credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     optionsSuccessStatus: 200,

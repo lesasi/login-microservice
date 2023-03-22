@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { GetServerSideProps } from "next/types";
 import React from "react";
+import { getFromServer } from "../../actions/base";
 import { loginUser } from "../../actions/user-login";
 import { CustomForm } from "../../components/CustomForm";
 import { AllowedFormInputTypes, IFormItem } from "../../components/CustomForm/types";
@@ -15,6 +16,7 @@ const formItems: IFormItem[] = [
 export default ({ data: { processedData, query } }) => {
   const submitForm = async (e: React.FormEvent, formData: ILoginFormInput) => {
     e.preventDefault()
+    console.log('processed data ', processedData)
     // TODO: create type for output
     const response = await loginUser<{ url: string, error: { message: string } }>(formData, query);
     if(response.url) {
@@ -38,9 +40,7 @@ export default ({ data: { processedData, query } }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
-  const data = await fetch(`${serverUrl}/auth/sample`, {});
-  const processedData = await data.json();
+  const processedData = await getFromServer<any>(`/auth/sample`, null, true)
   const query = context.query;
   return {
     props: {
