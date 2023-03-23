@@ -12,22 +12,38 @@ export class UserService {
   ){}
 
   async createUserWithEmailAndPassword(email: string, password: string) {
+    const existingUser = await this.userRepository.findOne({ email });
+    if(existingUser) {
+      throw new Error(`User with email ${email} already exists!`);
+    }
+    const encodedPassword = await this.encodingService.createHashFromString(password);
     const user: IUser = {
       _id: uuid(),
       email,
-      password,
+      password: encodedPassword,
       tokens: []
     };
-    await this.userRepository.addOrUpdateEntity(user);
+    const saveStatus = await this.userRepository.addOrUpdateEntity(user);
+    if(!saveStatus.status) {
+      throw new Error(saveStatus.errors.map(e => e.constraintsBroken.join(',')).join(','));
+    }
     return user;
   }
 
-  async getUserByEmail(email: string): Promise<IUser> {
-    return this.userRepository.findOne({ email });
+  async getUserByEmailAndPassword(email: string, password: string): Promise<IUser> {
+    const user = await this.userRepository.findOne({ email });
+    if(!user) {
+      throw new Error(`User not found with email ${email}`);
+    }
+    const isSame = await this.encodingService.compareStringWithHash(password, user.password);
+    if(!isSame) {
+      throw new Error('Password is not correct');
+    }
+    return user;
   }
 
   async generateAndSaveTokenToUser(user: IUser) {
-    const token = await this.encodingService.encodeId(user._id);
+    const token = await this.encodingService.encodeObjectToString({ _id: user._id });
     const updatedUser: IUser = {
       ...user,
       tokens: [...user.tokens, token]
@@ -40,11 +56,17 @@ export class UserService {
   }
 
   async getUserFromToken(token: string) {
-    const _id = await this.encodingService.decodeId(token);
-    const user = await this.userRepository.findOne({
-      _id,
-      tokens: token
-    });
+    const { success, error } = await this.encodingService.decodeStringToObject<{ _id: string }>(token);
+    let user: IUser;
+    if(success) {
+      user = await this.userRepository.findOne({
+        _id: success._id,
+        tokens: token
+      });
+    }
+    if((error && error === 'INVALID_JWT_SIGNATURE') || !user) {
+      throw new Error('Invalid token/cookie supplied, user not verified');
+    }
     return user;
   }
 

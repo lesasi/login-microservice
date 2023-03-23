@@ -1,0 +1,10 @@
+FROM node:14
+WORKDIR /var/www/html/login-microservice-client
+USER root
+COPY ./package.json .
+COPY ./yarn.lock .
+COPY ./.env.local .
+RUN chown -R node:node /var/www/html
+USER node
+RUN yarn install --frozen-lockfile
+CMD ["bash"]

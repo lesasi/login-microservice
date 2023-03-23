@@ -2,8 +2,9 @@ import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { ClassConstructor, plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { Filter, MongoClient, Sort } from "mongodb";
-import { IValidationMessage, transformErrorMessages } from "../../utils";
+import { transformErrorMessages } from "../../utils";
 import { IEntity } from "../interfaces/entity.interface";
+import { IMongoAddOrUpdateOutput } from "../interfaces/mongo-output.interface";
 import { MONGO_CONNECTION } from "../utils";
 
 @Injectable()
@@ -61,11 +62,12 @@ export abstract class BaseRepository<T extends IEntity> implements OnModuleInit 
     return entities;
   }
 
-  async addOrUpdateEntity(entity: T, ignoreValidation: boolean = false): Promise<void | IValidationMessage[]> {
-    await this.addOrUpdateEntities([entity], ignoreValidation);
+  async addOrUpdateEntity(entity: T, ignoreValidation: boolean = false): Promise<IMongoAddOrUpdateOutput> {
+    const status = await this.addOrUpdateEntities([entity], ignoreValidation);
+    return status;
   }
 
-  async addOrUpdateEntities(entities: T[], ignoreValidation = false): Promise<void| IValidationMessage[]> {
+  async addOrUpdateEntities(entities: T[], ignoreValidation = false): Promise<IMongoAddOrUpdateOutput> {
     if (!entities || entities.length === 0) {
       return;
     }
@@ -73,7 +75,10 @@ export abstract class BaseRepository<T extends IEntity> implements OnModuleInit 
       const errors = (await Promise.all(entities.map(async (e) => await this.validateEntity(e))))?.flat();
       if(errors && errors.length > 0) {
         console.error('Error in saving ', entities, errors)
-        return errors;
+        return {
+          status: false,
+          errors,
+        };
       }
     }
     const querys = entities.map((entity) => {
@@ -88,6 +93,9 @@ export abstract class BaseRepository<T extends IEntity> implements OnModuleInit 
       }
     }).filter(Boolean);
     await this.getCollection().bulkWrite(querys);
+    return {
+      status: true
+    };
   }
 
   async findCount(filter: Filter<T> = {}): Promise<number> {
